@@ -10,7 +10,7 @@ type item struct {
 	ttl   uint64
 }
 
-type cache struct {
+type Cache struct {
 	data   map[string]*item
 	ttl    uint64
 	hits   uint64
@@ -18,8 +18,8 @@ type cache struct {
 	lock   sync.RWMutex
 }
 
-func New(ttl uint64) *cache {
-	c := cache{
+func New(ttl uint64) *Cache {
+	c := Cache{
 		data:   make(map[string]*item),
 		ttl:    ttl,
 		hits:   0,
@@ -31,7 +31,7 @@ func New(ttl uint64) *cache {
 	return &c
 }
 
-func (c *cache) updateTTL() {
+func (c *Cache) updateTTL() {
 	for {
 		time.Sleep(time.Second)
 		for k, v := range c.data {
@@ -47,19 +47,19 @@ func (c *cache) updateTTL() {
 	}
 }
 
-func (c *cache) SetTTL(ttl uint64) {
+func (c *Cache) SetTTL(ttl uint64) {
 	c.lock.Lock()
 	c.ttl = ttl
 	c.lock.Unlock()
 }
 
-func (c *cache) Set(k string, v interface{}) {
+func (c *Cache) Set(k string, v interface{}) {
 	c.lock.Lock()
 	c.data[k] = &item{value: v, ttl: c.ttl}
 	c.lock.Unlock()
 }
 
-func (c *cache) Get(k string) interface{} {
+func (c *Cache) Get(k string) interface{} {
 	c.lock.RLock()
 	v, ok := c.data[k]
 	c.lock.RUnlock()
