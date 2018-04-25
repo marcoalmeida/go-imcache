@@ -11,7 +11,7 @@ type item struct {
 }
 
 type cache struct {
-	data   map[string]item
+	data   map[string]*item
 	ttl    uint64
 	hits   uint64
 	misses uint64
@@ -20,7 +20,7 @@ type cache struct {
 
 func New(ttl uint64) *cache {
 	c := cache{
-		data:   make(map[string]item),
+		data:   make(map[string]*item),
 		ttl:    ttl,
 		hits:   0,
 		misses: 0,
@@ -55,7 +55,7 @@ func (c *cache) SetTTL(ttl uint64) {
 
 func (c *cache) Set(k string, v interface{}) {
 	c.lock.Lock()
-	c.data[k] = item{value: v, ttl: c.ttl}
+	c.data[k] = &item{value: v, ttl: c.ttl}
 	c.lock.Unlock()
 }
 
@@ -66,7 +66,7 @@ func (c *cache) Get(k string) interface{} {
 
 	if ok {
 		c.hits++
-		return v
+		return v.value
 	} else {
 		c.misses++
 		return nil
